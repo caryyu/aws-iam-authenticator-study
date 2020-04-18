@@ -2,7 +2,6 @@
 
 > 全程环境必须要使用代理，否则很多依赖下载会产生问题，我想能上 Github 的也基本都有代理吧 😄
 
-
 # 预备知识
 
 - aws-cli
@@ -77,14 +76,26 @@ sed -i "" -e "s~<HTTP_PROXY_URL>~$HTTP_PROXY_URL~g" /tmp/environment
   aws configure --profile iam
   ```
 
-- 创建一个 Policy 拥有上述 Role 描述的权限，这个需要在控制台操作关联
+- 创建一个 Role 来做安全授权 - 哪一个用户具有此 Role 的 Assume 权限
   
+  我这里创建的一个 IAM 用户叫 caryyu，所以 POLICY 的语法中写法就是给此用户授权
+
+  ```shell
+  POLICY=$(echo -n '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::'; echo -n "$ACCOUNT_ID"; echo -n ':user/caryyu"},"Action":"sts:AssumeRole","Condition":{}}]}')
+
+  aws iam create-role \
+    --role-name KubernetesAdmin \
+    --description "Kubernetes administrator role (for AWS IAM Authenticator for Kubernetes)." \
+    --assume-role-policy-document "$POLICY" \
+    --output text \
+    --query 'Role.Arn'
+  ```
+
 - 利用命令生成 STS 的临时 TOKEN 进行保存进 VM 的 `~/.aws/credentials` 中
 
   ```shell
   aws sts assume-role --profile iam --role-arn "arn:aws:iam::${ACCOUNT_ID}:role/KubernetesAdmin" --role-session-name test
   ```
-
 
 # 注意事项
 
