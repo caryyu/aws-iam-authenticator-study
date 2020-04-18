@@ -23,6 +23,7 @@ sudo snap install kubectl --classic
 sudo microk8s.status --wait-ready
 sudo microk8s.kubectl label nodes ubuntu-xenial node-role.kubernetes.io/master=""
 sudo sed -i "s/<AWS_ACCOUNT_ID>/$AWS_ACCOUNT_ID/g" /tmp/k8s/aws-iam-authenticator.yaml
+sudo sed -i "s/<HTTP_PROXY_URL>/$HTTP_PROXY_URL/g" /tmp/k8s/aws-iam-authenticator.yaml
 echo "HTTPS_PROXY=$HTTP_PROXY_URL" | sudo tee -a /var/snap/microk8s/current/args/containerd-env
 sudo microk8s.stop
 sudo microk8s.start

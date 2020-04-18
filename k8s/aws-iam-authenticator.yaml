@@ -133,6 +133,8 @@ spec:
         env:
         - name: AWS_REGION
           value: cn-north-1
+        - name: HTTPS_PROXY
+          value: <HTTP_PROXY_URL>
         args:
         - server
         - --config=/etc/aws-iam-authenticator/config.yaml
