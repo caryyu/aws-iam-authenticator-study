@@ -1,0 +1,27 @@
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: <CA>
+    server: <SERVER>
+  name: microk8s-aws
+
+contexts:
+- context:
+    cluster: microk8s-aws
+    user: microk8s-aws
+    namespace: default
+  name: microk8s-aws
+
+current-context: microk8s-aws
+kind: Config
+preferences: {}
+users:
+- name: microk8s-aws
+  user:
+    exec:
+      apiVersion: client.authentication.k8s.io/v1alpha1
+      command: aws-iam-authenticator
+      args:
+      - token
+      - -i
+      - microk8s
