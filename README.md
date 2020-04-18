@@ -123,7 +123,7 @@ sed -i "" -e "s~<HTTP_PROXY_URL>~$HTTP_PROXY_URL~g" /tmp/environment
   aws_session_token = FwoGZXIvYXdzEMf//////////wEaDLA0FLudQrt6u2oYcyKsAUgtzMM3UHUfkaNE6XiHwo3m0VrVhN3i6X3HIWjraPfvjjEDjt3AzGFRno/ziwgOKbtjnRvRpqMeeb6VixlfW6S+1UPmdHdXRpD8xGhcAlXqVS958z7YLAH97ODcn9NSAM7KC51YmePgJdx6+Gda+0pbQ1lnEy5hjfJeBMAs9LRf/KHH5ddfC20++zg9SsZMk8nmA9/vafTOwiJQWdWpPnnze2OkVL43m7g/jzMon5fq9AUyLfKh6bo2y9VWwJ59s93NrxtCbh1t/uz0iQTQyqdVcskaGBZZuTQjA3dfkFefXA==
   ```
   
-  执行这一步要保证上述的 `~/.aws/credentials` 准备完毕了，由于 AWS 交互在国外可能会出现 `TLS handshake timeout` 的问题，多试几次就好了：
+  执行这一步要保证上述的 `~/.aws/credentials` 准备完毕了，由于 AWS 交互在国外可能会出现 `TLS handshake timeout` 的问题(分析 `aws-iam-authenticator` 的日志)，多试几次就好了，或者设置代理：
 
   ```shell
   kubectl -v=7 get pod
