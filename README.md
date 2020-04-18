@@ -2,7 +2,7 @@
 
 > 全程环境必须要使用代理，否则很多依赖下载会产生问题，我想能上 Github 的也基本都有代理吧 😄
 
-# 预备知识
+# 预备知识
 
 - aws-cli
 - vagrant & virtualbox
@@ -66,7 +66,7 @@ sed -i "" -e "s~<HTTP_PROXY_URL>~$HTTP_PROXY_URL~g" /tmp/environment
 
 顺便说一句：用户配置的对应关系在配置中使用 `mapUsers` 进行的关联。
 
-## 测试 Role 的权限(未走通)
+## 测试 Role 的权限
 
 首先创建一个 IAM 的用户，具有上述 `arn:aws:iam::$ACCOUNT_ID:role/KubernetesAdmin` 的 `STS AssumeRole` 的权限，步骤如下：
 
@@ -91,12 +91,44 @@ sed -i "" -e "s~<HTTP_PROXY_URL>~$HTTP_PROXY_URL~g" /tmp/environment
     --query 'Role.Arn'
   ```
 
-- 利用命令生成 STS 的临时 TOKEN 进行保存进 VM 的 `~/.aws/credentials` 中
+- 利用命令生成 STS 的临时 TOKEN 进行保存进 VM 的 `~/.aws/credentials` 中，然后按下列命令参考执行，这里需要的是 `assume-role` 出来的会话 ARN 不用管它，因为最终的角色依然会按照 `--role-arn` 进行匹配验证。
 
   ```shell
-  aws sts assume-role --profile iam --role-arn "arn:aws:iam::${ACCOUNT_ID}:role/KubernetesAdmin" --role-session-name test
+  aws sts assume-role --profile iam --role-arn "arn:aws:iam::${ACCOUNT_ID}:role/KubernetesAdmin" --role-session-name microk8s
+  ```
+   
+  上述执行完毕之后会产生一个 1 小时可用的临时会话 AK，如下：
+
+  ```json
+  {
+      "Credentials": {
+          "AccessKeyId": "ASIA5YHSUDGNLLNZOMDY",
+          "SecretAccessKey": "Dlwdw3FuWarIBQzjkRmNvO9S00he8oKa7pVa/yY5",
+          "SessionToken": "FwoGZXIvYXdzEMf//////////wEaDLA0FLudQrt6u2oYcyKsAUgtzMM3UHUfkaNE6XiHwo3m0VrVhN3i6X3HIWjraPfvjjEDjt3AzGFRno/ziwgOKbtjnRvRpqMeeb6VixlfW6S+1UPmdHdXRpD8xGhcAlXqVS958z7YLAH97ODcn9NSAM7KC51YmePgJdx6+Gda+0pbQ1lnEy5hjfJeBMAs9LRf/KHH5ddfC20++zg9SsZMk8nmA9/vafTOwiJQWdWpPnnze2OkVL43m7g/jzMon5fq9AUyLfKh6bo2y9VWwJ59s93NrxtCbh1t/uz0iQTQyqdVcskaGBZZuTQjA3dfkFefXA==",
+          "Expiration": "2020-04-18T06:09:51Z"
+      },
+      "AssumedRoleUser": {
+          "AssumedRoleId": "AROA5YHSUDGNMU2QYY6RF:microk8s",
+          "Arn": "arn:aws:sts::945401633178:assumed-role/KubernetesAdmin/microk8s"
+      }
+  }
   ```
 
-# 注意事项
+  把上述的 JSON 内容复然后保存进 VM 中的 `~/.aws/credentials` 中去使用：
+
+  ```ini
+  [default]
+  aws_access_key_id = ASIA5YHSUDGNLLNZOMDY
+  aws_secret_access_key = Dlwdw3FuWarIBQzjkRmNvO9S00he8oKa7pVa/yY5
+  aws_session_token = FwoGZXIvYXdzEMf//////////wEaDLA0FLudQrt6u2oYcyKsAUgtzMM3UHUfkaNE6XiHwo3m0VrVhN3i6X3HIWjraPfvjjEDjt3AzGFRno/ziwgOKbtjnRvRpqMeeb6VixlfW6S+1UPmdHdXRpD8xGhcAlXqVS958z7YLAH97ODcn9NSAM7KC51YmePgJdx6+Gda+0pbQ1lnEy5hjfJeBMAs9LRf/KHH5ddfC20++zg9SsZMk8nmA9/vafTOwiJQWdWpPnnze2OkVL43m7g/jzMon5fq9AUyLfKh6bo2y9VWwJ59s93NrxtCbh1t/uz0iQTQyqdVcskaGBZZuTQjA3dfkFefXA==
+  ```
+  
+  执行这一步要保证上述的 `~/.aws/credentials` 准备完毕了，由于 AWS 交互在国外可能会出现 `TLS handshake timeout` 的问题，多试几次就好了：
+
+  ```shell
+  kubectl -v=7 get pod
+  ```
+
+# 注意事项
 
 - 记住 `~/.aws/credentials` 中的 token 不能使用 root 账号，必须要创建一个 iam 的用户再进行 AssumeRole

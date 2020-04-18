@@ -41,3 +41,4 @@ CA=`sudo microk8s.config | grep "certificate-authority-data" | sed "s/certificat
 sudo sed -i "s/<CA>/$CA/g" /tmp/k8s/config
 SERVER=`sudo microk8s.config | grep "server" | sed "s/server://g" | xargs`
 sudo sed -i "s~<SERVER>~$SERVER~g" /tmp/k8s/config
+sudo cp /tmp/k8s/config /root/.kube/config
