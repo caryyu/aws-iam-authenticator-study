@@ -58,7 +58,32 @@ sed -i "" -e "s~<HTTP_PROXY_URL>~$HTTP_PROXY_URL~g" /tmp/environment
     vagrant ssh
     ```
 
+# 开始测试
+
+## 测试 User 的权限
+
+我们可以直接创建一个 IAM 的用户也可以进行测试，上述创建的 Role 其实可以忽略，但实际组织场景使用最多的还是 Role，比如 SSO 协议 SAML2 集成 AWS 的 IAM 最后都是 Role 来处理的，这里先跳过，用户比较简单。
+
+顺便说一句：用户配置的对应关系在配置中使用 `mapUsers` 进行的关联。
+
+## 测试 Role 的权限(未走通)
+
+首先创建一个 IAM 的用户，具有上述 `arn:aws:iam::$ACCOUNT_ID:role/KubernetesAdmin` 的 `STS AssumeRole` 的权限，步骤如下：
+
+- 到 IAM 控制台进行创建 IAM 用户，并保存 AK 到 `~/.aws/credentials` 中
+  
+  ```shell
+  aws configure --profile iam
+  ```
+
+- 创建一个 Policy 拥有上述 Role 描述的权限，这个需要在控制台操作关联
+  
+- 利用命令生成 STS 的临时 TOKEN 进行保存进 VM 的 `~/.aws/credentials` 中
+
+  ```shell
+  aws sts assume-role --profile iam --role-arn "arn:aws:iam::${ACCOUNT_ID}:role/KubernetesAdmin" --role-session-name test
+  ```
 
 # 注意事项
 
-- 记住 `~/.aws/credential` 中的 token 不能使用 root 账号，必须要创建一个 iam 的用户再进行 AssumeRole
+- 记住 `~/.aws/credentials` 中的 token 不能使用 root 账号，必须要创建一个 iam 的用户再进行 AssumeRole
