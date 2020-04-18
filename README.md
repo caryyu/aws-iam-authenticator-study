@@ -2,6 +2,7 @@
 
 > 全程环境必须要使用代理，否则很多依赖下载会产生问题，我想能上 Github 的也基本都有代理吧 😄
 
+
 # 预备知识
 
 - aws-cli
@@ -83,6 +84,7 @@ sed -i "" -e "s~<HTTP_PROXY_URL>~$HTTP_PROXY_URL~g" /tmp/environment
   ```shell
   aws sts assume-role --profile iam --role-arn "arn:aws:iam::${ACCOUNT_ID}:role/KubernetesAdmin" --role-session-name test
   ```
+
 
 # 注意事项
 

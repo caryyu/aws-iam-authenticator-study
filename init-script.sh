@@ -8,8 +8,8 @@ echo "HTTP_PROXY_URL: $HTTP_PROXY_URL"
 # aws-iam-authenticator setup
 URL=https://amazon-eks.s3.us-west-2.amazonaws.com/1.15.10/2020-02-22/bin/linux/amd64/aws-iam-authenticator
 sudo curl -s -x $HTTP_PROXY_URL $URL \
-  -o /usr/local/aws-iam-authenticator
-sudo chmod u+x /usr/local/aws-iam-authenticator
+  -o /usr/local/bin/aws-iam-authenticator
+sudo chmod u+x /usr/local/bin/aws-iam-authenticator
 
 sudo snap set system proxy.https=$HTTP_PROXY_URL
 
