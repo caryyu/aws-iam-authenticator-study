@@ -12,21 +12,12 @@
 
 ## aws-cli
 
-确保按照 `aws-iam-authenticator` 文档在 AWS Console 创建了一个所需的 Role ，请注意在 Mac 系统上进行的操作，配置的话直接用 AWS 的 `Root` 账号就可以了
+先使用 AWS 的 Root 账户进行获取 AccountID 到环境中
 
 ```shell
 aws configure
 
 ACCOUNT_ID=$(aws sts get-caller-identity --output text --query 'Account')
-
-POLICY=$(echo -n '{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Principal":{"AWS":"arn:aws:iam::'; echo -n "$ACCOUNT_ID"; echo -n ':root"},"Action":"sts:AssumeRole","Condition":{}}]}')
-
-aws iam create-role \
-  --role-name KubernetesAdmin \
-  --description "Kubernetes administrator role (for AWS IAM Authenticator for Kubernetes)." \
-  --assume-role-policy-document "$POLICY" \
-  --output text \
-  --query 'Role.Arn'
 ```
 
 > 确保命令在 Mac 电脑或主机上运行
