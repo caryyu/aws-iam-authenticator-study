@@ -112,8 +112,8 @@ sed -i "" -e "s~<HTTP_PROXY_URL>~$HTTP_PROXY_URL~g" /tmp/environment
   ```shell
   aws sts assume-role --profile iam --role-arn "arn:aws:iam::${ACCOUNT_ID}:role/KubernetesAdmin" --role-session-name microk8s
   ```
-   
-  上述执行完毕之后会产生一个 1 小时可用的临时会话 AK，如下：
+
+  上述执行完毕之后会产生一个 1 小时可用的临时会话 AK，如下：
 
   ```json
   {
@@ -153,10 +153,8 @@ sed -i "" -e "s~<HTTP_PROXY_URL>~$HTTP_PROXY_URL~g" /tmp/environment
 
     ```shell
     export AWS_PROFILE=test
-    
-    aws-iam-authenticator token -i microk8s
 
-    {"kind":"ExecCredential","apiVersion":"client.authentication.k8s.io/v1alpha1","spec":{},"status":{"expirationTimestamp":"2020-04-20T04:39:51Z","token":"k8s-aws-v1.aHR0cHM6Ly9zdHMuYW1hem9uYXdzLmNvbS8_QWN0aW9uPUdldENhbGxlcklkZW50aXR5JlZlcnNpb249MjAxMS0wNi0xNSZYLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFTSUE1WUhTVURHTkRQQVNEM1dYJTJGMjAyMDA0MjAlMkZ1cy1lYXN0LTElMkZzdHMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDIwMDQyMFQwNDI1NTFaJlgtQW16LUV4cGlyZXM9MCZYLUFtei1TZWN1cml0eS1Ub2tlbj1Gd29HWlhJdllYZHpFUGIlMkYlMkYlMkYlMkYlMkYlMkYlMkYlMkYlMkYlMkZ3RWFEUHlwVzBycEd0eTBjdkI3OGlLc0Fmeld6eUlDNFBLMnRRREdpNHdna3N1bnRRNmlxSlBCQXMlMkJZbm8lMkYlMkZXaUh3Z2VIMDdLQzVieW9KOUd6VFRPalB6THk1TlQ2RlgyeSUyRmRtdGVudVV3VnN1NWlaVDlNVzl3Q2NZclpjc3clMkIzMVp5VkFiemlGeTY5VmF5TXRZaFM4V3NDck1kJTJGUm5jdG5MOUd6bm51Y2tnRTNlYWdXMGhTWjQzZjJ4YWJzSzRhSmVYU25Bb0k2NEdRRUNmYWVtT0pRViUyRkxpTmtFeG1uR1Qzc1VIVUt5b0p0bmhPWGw0bFlSWUlVTXkyTDdvbzM4WDA5QVV5TGQyU0w2ZW5pM2V1bThSZkpOOFhUdVM3TWZSTGs0cCUyQjBtaEF3bjdPOTFpcmVGSlBocmpuUjhzQk1Xd3RYQSUzRCUzRCZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QlM0J4LWs4cy1hd3MtaWQmWC1BbXotU2lnbmF0dXJlPWMyM2ViODAwM2ZjNjQzM2M1ZmJjYjE2NjM1Yjc4OWRmM2UxM2JhYzU3ZmE2YzJmMzc0NThkZDcxNDQxNjRiYjc"}}
+    TOKEN=`aws-iam-authenticator token -i microk8s | jq .status.token`
 
     curl $APISERVER/api --header "Authorization: Bearer $TOKEN" --insecure
     ```
