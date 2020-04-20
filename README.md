@@ -1,16 +1,41 @@
-学习 `aws-iam-authenticator` 的授权验证。
+学习 [aws-iam-authenticator](https://github.com/kubernetes-sigs/aws-iam-authenticator) 的授权验证，主要原理是利用 `Kubernetes` 的 `WebHook` 验证授权功能进行的扩展，具体的阶段步骤如下图所示：
 
 > 全程环境必须要使用代理，否则很多依赖下载会产生问题，我想能上 Github 的也基本都有代理吧 😄
 
+![IMG](WX20200420-111650.png)
+
+上图定义的 `AK(Access Token)` 说明：
+
+- `Root AK` - 阶段一的操作需要 AWS 的 `Root` 账号或者其 AK 来做
+- `IAM USER AK` - 阶段二的操作需要利用阶段一所创建的 `IAM` 用户来做
+- `Session AK` - 阶段三的操作需要利用阶段二所创建的临时会话/临时用户来做
+
+> 注意: 以上信息同时会在 `~/.aws/credentials` 配置中通过 `Profile` 进行体现
+
 # 预备知识
 
-- aws-cli
-- vagrant & virtualbox
-- microk8s
+- AWS CLI
+- Vagrant & Virtualbox
+- Microk8s
 - aws-iam-authenticator
-- kubectl
+- Kubernetes & Kubectl
 
-## aws-cli
+## 环境准备
+
+- AWS CLI
+  
+  ```shell
+  pip3 install awscli
+  ```
+
+- Vagrant & Virtualbox
+
+  ```shell
+  brew cask install vagrant
+  brew cask install virtualbox
+  ```
+
+## AWS-CLI - Stage 1
 
 先使用 AWS 的 Root 账户进行获取 AccountID 到环境中
 
@@ -116,9 +141,25 @@ sed -i "" -e "s~<HTTP_PROXY_URL>~$HTTP_PROXY_URL~g" /tmp/environment
   
   执行这一步要保证上述的 `~/.aws/credentials` 准备完毕了，由于 AWS 交互在国外可能会出现 `TLS handshake timeout` 的问题(分析 `aws-iam-authenticator` 的日志)，多试几次就好了，或者设置代理：
 
-  ```shell
-  kubectl -v=7 get pod
-  ```
+  - 测试方式一
+
+    ```shell
+    kubectl -v=7 get pod
+    ```
+
+  - 测试方式二
+  
+    或者，利用客户端方式测试 aws-iam-authenticator 获取 Bearer Token 的 JWT
+
+    ```shell
+    export AWS_PROFILE=test
+    
+    aws-iam-authenticator token -i microk8s
+
+    {"kind":"ExecCredential","apiVersion":"client.authentication.k8s.io/v1alpha1","spec":{},"status":{"expirationTimestamp":"2020-04-20T04:39:51Z","token":"k8s-aws-v1.aHR0cHM6Ly9zdHMuYW1hem9uYXdzLmNvbS8_QWN0aW9uPUdldENhbGxlcklkZW50aXR5JlZlcnNpb249MjAxMS0wNi0xNSZYLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFTSUE1WUhTVURHTkRQQVNEM1dYJTJGMjAyMDA0MjAlMkZ1cy1lYXN0LTElMkZzdHMlMkZhd3M0X3JlcXVlc3QmWC1BbXotRGF0ZT0yMDIwMDQyMFQwNDI1NTFaJlgtQW16LUV4cGlyZXM9MCZYLUFtei1TZWN1cml0eS1Ub2tlbj1Gd29HWlhJdllYZHpFUGIlMkYlMkYlMkYlMkYlMkYlMkYlMkYlMkYlMkYlMkZ3RWFEUHlwVzBycEd0eTBjdkI3OGlLc0Fmeld6eUlDNFBLMnRRREdpNHdna3N1bnRRNmlxSlBCQXMlMkJZbm8lMkYlMkZXaUh3Z2VIMDdLQzVieW9KOUd6VFRPalB6THk1TlQ2RlgyeSUyRmRtdGVudVV3VnN1NWlaVDlNVzl3Q2NZclpjc3clMkIzMVp5VkFiemlGeTY5VmF5TXRZaFM4V3NDck1kJTJGUm5jdG5MOUd6bm51Y2tnRTNlYWdXMGhTWjQzZjJ4YWJzSzRhSmVYU25Bb0k2NEdRRUNmYWVtT0pRViUyRkxpTmtFeG1uR1Qzc1VIVUt5b0p0bmhPWGw0bFlSWUlVTXkyTDdvbzM4WDA5QVV5TGQyU0w2ZW5pM2V1bThSZkpOOFhUdVM3TWZSTGs0cCUyQjBtaEF3bjdPOTFpcmVGSlBocmpuUjhzQk1Xd3RYQSUzRCUzRCZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QlM0J4LWs4cy1hd3MtaWQmWC1BbXotU2lnbmF0dXJlPWMyM2ViODAwM2ZjNjQzM2M1ZmJjYjE2NjM1Yjc4OWRmM2UxM2JhYzU3ZmE2YzJmMzc0NThkZDcxNDQxNjRiYjc"}}
+
+    curl $APISERVER/api --header "Authorization: Bearer $TOKEN" --insecure
+    ```
 
 # 注意事项
 
